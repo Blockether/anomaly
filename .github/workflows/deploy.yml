@@ -67,20 +67,34 @@ jobs:
             COMMITS=$(git log --pretty=format:"- %s" ${PREV_TAG}..${CURRENT_TAG})
           fi
           
-          # Insert new entry after [Unreleased] section (line 7)
+          # Find the [Unreleased] heading line dynamically
+          UNRELEASED_LINE=$(grep -n '^## \[Unreleased\]' CHANGELOG.md | head -1 | cut -d: -f1)
+          
+          if [ -z "$UNRELEASED_LINE" ]; then
+            echo "ERROR: Could not find ## [Unreleased] section in CHANGELOG.md"
+            exit 1
+          fi
+          
+          # Insert new version entry after the [Unreleased] heading
+          # Result: ## [Unreleased] (empty) -> ## [vX.Y.Z] - DATE -> rest of file
           {
-            head -n 7 CHANGELOG.md
+            head -n "$UNRELEASED_LINE" CHANGELOG.md
+            echo ""
             echo "## [$CURRENT_TAG] - $DATE"
             echo ""
             echo "### Changed"
             echo "$COMMITS"
             echo ""
-            tail -n +8 CHANGELOG.md
+            tail -n +$((UNRELEASED_LINE + 1)) CHANGELOG.md
           } > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
           
-          # Update links
+          # Update the [Unreleased] comparison link
           sed -i "s|\[Unreleased\]: .*|[Unreleased]: https://github.com/Blockether/anomaly/compare/${CURRENT_TAG}...HEAD|" CHANGELOG.md
-          echo "[$CURRENT_TAG]: https://github.com/Blockether/anomaly/releases/tag/${CURRENT_TAG}" >> CHANGELOG.md
+          
+          # Add version link if not already present
+          if ! grep -q "^\[${CURRENT_TAG}\]:" CHANGELOG.md; then
+            echo "[$CURRENT_TAG]: https://github.com/Blockether/anomaly/releases/tag/${CURRENT_TAG}" >> CHANGELOG.md
+          fi
 
       - name: Commit CHANGELOG.md
         run: |
