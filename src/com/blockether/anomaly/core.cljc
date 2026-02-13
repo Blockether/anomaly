@@ -262,10 +262,9 @@
    Returns:
    Map or nil. The anomaly map if exception contains one, nil otherwise."
   [e]
-  (when (instance? clojure.lang.ExceptionInfo e)
-    (let [data (ex-data e)]
-      (when (anomaly? data)
-        data))))
+  (let [data (ex-data e)]
+    (when (anomaly? data)
+      data)))
 
 #_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
 (defn ex->anomaly
