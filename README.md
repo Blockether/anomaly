@@ -7,7 +7,7 @@ Blockether anomalies - standardized error categories based on [Cognitect anomali
 Add the following dependency to your `deps.edn`:
 
 ```clojure
-{:deps {com.blockether/anomaly {:mvn/version "1.0.1"}}}
+{:deps {com.blockether/anomaly {:mvn/version "1.0.0"}}}
 ```
 
 ## Usage
